@@ -1,0 +1,47 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres:15
+    container_name: db-store
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx-proxy
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf 
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - app-network
+
+  app:
+    build:
+      context: .
+    container_name: app-store
+    environment:
+      - DB_NAME=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - secret=64d37c89f12db51554ce8460a5424d84249b1932d4066d89fa32d84b11718745
+      - algorithm=HS256
+    depends_on:
+      - db
+    networks:
+      - app-network
+    ports:
+      - "8000:8000"
+
+networks:
+  app-network:
+    driver: bridge
